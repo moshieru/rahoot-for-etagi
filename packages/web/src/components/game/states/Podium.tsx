@@ -43,37 +43,30 @@ const Podium = ({ data: { subject, top } }: Props) => {
       case 4:
         sfxRoolStop()
         sfxFirst()
-
         break
 
       case 3:
         sfxRool()
-
         break
 
       case 2:
         sfxSecond()
-
         break
 
       case 1:
         sfxtThree()
-
         break
     }
   }, [apparition, sfxFirst, sfxSecond, sfxtThree, sfxRool, sfxRoolStop])
-
   useEffect(() => {
     if (top.length < 3) {
       setApparition(4)
-
       return
     }
 
     const interval = setInterval(() => {
       if (apparition > 4) {
         clearInterval(interval)
-
         return
       }
 
@@ -83,7 +76,6 @@ const Podium = ({ data: { subject, top } }: Props) => {
     // eslint-disable-next-line consistent-return
     return () => clearInterval(interval)
   }, [apparition, top.length])
-
   return (
     <>
       {apparition >= 4 && (

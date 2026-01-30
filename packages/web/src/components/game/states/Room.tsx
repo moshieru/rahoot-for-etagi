@@ -56,7 +56,7 @@ const Room = ({ data: { text, inviteCode } }: Props) => {
 
       <div className="mb-6 flex items-center justify-center rounded-full bg-black/40 px-6 py-3">
         <span className="text-2xl font-bold text-white drop-shadow-md">
-          Players Joined: {totalPlayers}
+          Подключилось игроков: {totalPlayers}
         </span>
       </div>
 

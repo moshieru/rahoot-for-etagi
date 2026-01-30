@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
     const game = registry.getGameByInviteCode(inviteCode)
 
     if (!game) {
-      socket.emit("game:errorMessage", "Game not found")
+      socket.emit("game:errorMessage", "Игра не найдена")
 
       return
     }

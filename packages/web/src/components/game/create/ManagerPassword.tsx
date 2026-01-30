@@ -32,9 +32,9 @@ const ManagerPassword = ({ onSubmit }: Props) => {
         type="password"
         onChange={(e) => setPassword(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Manager password"
+        placeholder="Пароль менеджера"
       />
-      <Button onClick={handleSubmit}>Submit</Button>
+      <Button onClick={handleSubmit}>Принять</Button>
     </Form>
   )
 }

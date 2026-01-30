@@ -29,7 +29,7 @@ const Room = () => {
       <Input
         onChange={(e) => setInvitation(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="PIN Code here"
+        placeholder="Пин-код"
       />
       <Button onClick={handleJoin}>Submit</Button>
     </Form>

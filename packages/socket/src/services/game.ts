@@ -193,7 +193,7 @@ class Game {
     const status = this.managerStatus ||
       this.lastBroadcastStatus || {
         name: STATUS.WAIT,
-        data: { text: "Waiting for players" },
+        data: { text: "Ожидание игроков" },
       }
     socket.emit("manager:successReconnect", {
       gameId: this.gameId,
@@ -233,7 +233,7 @@ class Game {
     const status = this.playerStatus.get(oldSocketId) ||
       this.lastBroadcastStatus || {
         name: STATUS.WAIT,
-        data: { text: "Waiting for players" },
+        data: { text: "Ожидание игроков" },
       }
     if (this.playerStatus.has(oldSocketId)) {
       const oldStatus = this.playerStatus.get(oldSocketId)!
@@ -405,7 +405,7 @@ class Game {
 
       this.sendStatus(player.id, STATUS.SHOW_RESULT, {
         correct: player.lastCorrect,
-        message: player.lastCorrect ? "Nice!" : "Too bad",
+        message: player.lastCorrect ? "Супер!" : "Не очень",
         points: player.lastPoints,
         myPoints: player.points,
         rank,
@@ -445,7 +445,7 @@ class Game {
     })
 
     this.sendStatus(socket.id, STATUS.WAIT, {
-      text: "Waiting for the players to answer",
+      text: "Ожидание ответов игроков",
     })
 
     socket

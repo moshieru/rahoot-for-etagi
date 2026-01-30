@@ -67,7 +67,7 @@ export interface ClientToServerEvents {
   // Manager actions
   //"game:create": (_quizzId: string) => void
   "game:create": (_message: {
-    quizz: string
+    quizzId: string
     teamName: string
   }) => void
   "manager:auth": (_password: string) => void

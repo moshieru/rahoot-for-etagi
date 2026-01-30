@@ -2,7 +2,7 @@ import z from "zod"
 
 export const usernameValidator = z
   .string()
-  .min(4, "Username cannot be less than 4 characters")
-  .max(20, "Username cannot exceed 20 characters")
+  .min(12, "ФИО не может быть меньше 12 символов")
+  .max(50, "ФИО не может быть больше 50 символов")
 
-export const inviteCodeValidator = z.string().length(6, "Invalid invite code")
+export const inviteCodeValidator = z.string().length(6, "Неверный код")

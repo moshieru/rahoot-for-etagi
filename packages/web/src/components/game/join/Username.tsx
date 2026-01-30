@@ -31,7 +31,7 @@ const Username = () => {
   }
 
   useEvent("game:successJoin", (gameId) => {
-    setStatus(STATUS.WAIT, { text: "Waiting for the players" })
+    setStatus(STATUS.WAIT, { text: "Ожидание игроков" })
     login(username)
 
     router.replace(`/game/${gameId}`)
@@ -42,9 +42,9 @@ const Username = () => {
       <Input
         onChange={(e) => setUsername(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Username here"
+        placeholder="Ваше ФИО"
       />
-      <Button onClick={handleLogin}>Submit</Button>
+      <Button onClick={handleLogin}>Принять</Button>
     </Form>
   )
 }

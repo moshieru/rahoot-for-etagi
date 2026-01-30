@@ -8,7 +8,7 @@ export const withGame = (
   callback: (_game: Game) => void
 ): void => {
   if (!gameId) {
-    socket.emit("game:errorMessage", "Game not found")
+    socket.emit("game:errorMessage", "Игра не найдена")
 
     return
   }
@@ -17,7 +17,7 @@ export const withGame = (
   const game = registry.getGameById(gameId)
 
   if (!game) {
-    socket.emit("game:errorMessage", "Game not found")
+    socket.emit("game:errorMessage", "Игра не найдена")
 
     return
   }

@@ -27,7 +27,7 @@ const Manager = () => {
 
   useEvent("manager:gameCreated", ({ gameId, inviteCode }) => {
     setGameId(gameId)
-    setStatus(STATUS.SHOW_ROOM, { text: "Waiting for the players", inviteCode })
+    setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode })
     router.push(`/game/manager/${gameId}`)
   })
 
@@ -43,7 +43,7 @@ const Manager = () => {
   const handleStartGame = (teamName: string) => {
     if (selectedQuizz) {
       socket?.emit("game:create", {
-        quizz: selectedQuizz,
+        quizzId: selectedQuizz,
         teamName
       })
     }
