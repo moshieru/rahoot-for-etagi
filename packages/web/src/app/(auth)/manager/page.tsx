@@ -4,6 +4,7 @@ import { QuizzWithId } from "@rahoot/common/types/game"
 import { STATUS } from "@rahoot/common/types/game/status"
 import ManagerPassword from "@rahoot/web/components/game/create/ManagerPassword"
 import SelectQuizz from "@rahoot/web/components/game/create/SelectQuizz"
+import TeamNameForm from "@rahoot/web/components/game/create/TeamNameForm"
 import { useEvent, useSocket } from "@rahoot/web/contexts/socketProvider"
 import { useManagerStore } from "@rahoot/web/stores/manager"
 import { useRouter } from "next/navigation"
@@ -16,6 +17,8 @@ const Manager = () => {
 
   const [isAuth, setIsAuth] = useState(false)
   const [quizzList, setQuizzList] = useState<QuizzWithId[]>([])
+  const [selectedQuizz, setSelectedQuizz] = useState<string | null>(null)
+  const [showTeamForm, setShowTeamForm] = useState(false)
 
   useEvent("manager:quizzList", (quizzList) => {
     setIsAuth(true)
@@ -31,15 +34,30 @@ const Manager = () => {
   const handleAuth = (password: string) => {
     socket?.emit("manager:auth", password)
   }
-  const handleCreate = (quizzId: string) => {
-    socket?.emit("game:create", quizzId)
+
+  const handleSelectQuizz = (quizzId: string) => {
+    setSelectedQuizz(quizzId)
+    setShowTeamForm(true)
+  }
+
+  const handleStartGame = (teamName: string) => {
+    if (selectedQuizz) {
+      socket?.emit("game:create", {
+        quizz: selectedQuizz,
+        teamName
+      })
+    }
   }
 
   if (!isAuth) {
     return <ManagerPassword onSubmit={handleAuth} />
   }
 
-  return <SelectQuizz quizzList={quizzList} onSelect={handleCreate} />
+  if (showTeamForm) {
+    return <TeamNameForm onSubmit={handleStartGame} />
+  }
+
+  return <SelectQuizz quizzList={quizzList} onSelect={handleSelectQuizz} />
 }
 
 export default Manager

@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
     }
   })
 
-  socket.on("game:create", (quizzId) => {
+  socket.on("game:create", ({ quizzId, teamName }) => {
     const quizzList = Config.quizz()
     const quizz = quizzList.find((q) => q.id === quizzId)
 
@@ -76,7 +76,7 @@ io.on("connection", (socket) => {
       return
     }
 
-    const game = new Game(io, socket, quizz)
+    const game = new Game(io, socket, quizz, teamName)
     registry.addGame(game)
   })
 

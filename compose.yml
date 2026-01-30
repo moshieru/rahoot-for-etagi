@@ -2,13 +2,14 @@ version: "3.8"
 
 services:
   rahoot:
-    image: ralex91/rahoot:latest
+    build: .
+    image: rahoot-local
     ports:
       - "3000:3000"
       - "3001:3001"
     volumes:
       - ./config:/app/config # Path to your game config
     environment:
-      - WEB_ORIGIN=https://quiz.etagi.com
-      - SOCKET_URL=https://quiz.etagi.com
+      - WEB_ORIGIN=localhost:3000
+      - SOCKET_URL=localhost:3001
       - MANAGER_PASSWORD=admin

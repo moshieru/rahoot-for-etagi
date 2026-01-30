@@ -32,18 +32,18 @@ class Game {
   quizz: Quizz
   players: Player[]
 
+  teamName: string
+
   round: {
     currentQuestion: number
     playersAnswers: Answer[]
     startTime: number
   }
-
   cooldown: {
     active: boolean
     ms: number
   }
-
-  constructor(io: Server, socket: Socket, quizz: Quizz) {
+  constructor(io: Server, socket: Socket, quizz: Quizz, teamName: string) {
     if (!io) {
       throw new Error("Socket server not initialized")
     }
@@ -66,7 +66,6 @@ class Game {
     this.tempOldLeaderboard = null
 
     this.players = []
-
     this.round = {
       playersAnswers: [],
       currentQuestion: 0,
@@ -86,6 +85,7 @@ class Game {
       connected: true,
     }
     this.quizz = quizz
+    this.teamName = teamName
 
     socket.join(this.gameId)
     socket.emit("manager:gameCreated", {
@@ -142,10 +142,8 @@ class Game {
     }
 
     this.players.push(playerData)
-
     this.io.to(this.manager.id).emit("manager:newPlayer", playerData)
     this.io.to(this.gameId).emit("game:totalPlayers", this.players.length)
-
     socket.emit("game:successJoin", this.gameId)
   }
 
@@ -162,13 +160,11 @@ class Game {
 
     this.players = this.players.filter((p) => p.id !== playerId)
     this.playerStatus.delete(playerId)
-
     this.io.in(playerId).socketsLeave(this.gameId)
     this.io
       .to(player.id)
       .emit("game:reset", "You have been kicked by the manager")
     this.io.to(this.manager.id).emit("manager:playerKicked", player.id)
-
     this.io.to(this.gameId).emit("game:totalPlayers", this.players.length)
   }
 
@@ -199,7 +195,6 @@ class Game {
         name: STATUS.WAIT,
         data: { text: "Waiting for players" },
       }
-
     socket.emit("manager:successReconnect", {
       gameId: this.gameId,
       currentQuestion: {
@@ -240,7 +235,6 @@ class Game {
         name: STATUS.WAIT,
         data: { text: "Waiting for players" },
       }
-
     if (this.playerStatus.has(oldSocketId)) {
       const oldStatus = this.playerStatus.get(oldSocketId)!
       this.playerStatus.delete(oldSocketId)
@@ -313,7 +307,6 @@ class Game {
 
     this.io.to(this.gameId).emit("game:startCooldown")
     await this.startCooldown(3)
-
     this.newRound()
   }
 
@@ -350,7 +343,6 @@ class Game {
     })
 
     await sleep(question.cooldown)
-
     if (!this.started) {
       return
     }
@@ -366,7 +358,6 @@ class Game {
     })
 
     await this.startCooldown(question.time)
-
     if (!this.started) {
       return
     }
@@ -379,7 +370,6 @@ class Game {
       this.leaderboard.length === 0
         ? this.players.map((p) => ({ ...p }))
         : this.leaderboard.map((p) => ({ ...p }))
-
     const totalType = this.round.playersAnswers.reduce(
       (acc: Record<number, number>, { answerId }) => {
         acc[answerId] = (acc[answerId] || 0) + 1
@@ -407,7 +397,6 @@ class Game {
         return { ...player, lastCorrect: isCorrect, lastPoints: points }
       })
       .sort((a, b) => b.points - a.points)
-
     this.players = sortedPlayers
 
     sortedPlayers.forEach((player, index) => {
@@ -462,9 +451,7 @@ class Game {
     socket
       .to(this.gameId)
       .emit("game:playerAnswer", this.round.playersAnswers.length)
-
     this.io.to(this.gameId).emit("game:totalPlayers", this.players.length)
-
     if (this.round.playersAnswers.length === this.players.length) {
       this.abortCooldown()
     }
