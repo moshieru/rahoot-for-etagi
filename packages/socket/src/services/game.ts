@@ -91,6 +91,7 @@ class Game {
     socket.emit("manager:gameCreated", {
       gameId: this.gameId,
       inviteCode: roomInvite,
+      instructions: this.quizz.instructions
     })
 
     console.log(
@@ -298,9 +299,16 @@ class Game {
 
     this.started = true
 
+    this.broadcastStatus(STATUS.SHOW_ROOM, {
+      text: "Ожидание игроков",
+      inviteCode: this.inviteCode,
+      instructions: this.quizz.instructions
+    })
+
     this.broadcastStatus(STATUS.SHOW_START, {
       time: 3,
       subject: this.quizz.subject,
+      instructions: this.quizz.instructions
     })
 
     await sleep(3)

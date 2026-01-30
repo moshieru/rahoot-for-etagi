@@ -7,10 +7,11 @@ import { useManagerStore } from "@rahoot/web/stores/manager"
 import { useState } from "react"
 
 type Props = {
-  data: ManagerStatusDataMap["SHOW_ROOM"]
+  data: ManagerStatusDataMap["SHOW_ROOM"] & { instructions?: string }
 }
 
-const Room = ({ data: { text, inviteCode } }: Props) => {
+const Room = ({ data }: Props) => {
+  const { text, inviteCode } = data
   const { gameId } = useManagerStore()
   const { socket } = useSocket()
   const { players } = useManagerStore()
@@ -50,9 +51,17 @@ const Room = ({ data: { text, inviteCode } }: Props) => {
         {inviteCode}
       </div>
 
+
+
       <h2 className="mb-4 text-4xl font-bold text-white drop-shadow-lg">
         {text}
       </h2>
+
+      <div className="mb-8 text-center">
+        <p className="text-lg text-white">
+          {data.instructions}
+        </p>
+      </div>
 
       <div className="mb-6 flex items-center justify-center rounded-full bg-black/40 px-6 py-3">
         <span className="text-2xl font-bold text-white drop-shadow-md">

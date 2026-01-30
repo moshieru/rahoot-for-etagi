@@ -16,7 +16,8 @@ export const STATUS = {
 export type Status = (typeof STATUS)[keyof typeof STATUS]
 
 export type CommonStatusDataMap = {
-  SHOW_START: { time: number; subject: string }
+  SHOW_START: { time: number; subject: string; instructions?: string }
+  SHOW_ROOM: { text: string; inviteCode?: string; instructions?: string }
   SHOW_PREPARED: { totalAnswers: number; questionNumber: number }
   SHOW_QUESTION: { question: string; image?: string; cooldown: number }
   SELECT_ANSWER: {

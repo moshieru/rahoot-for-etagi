@@ -14,6 +14,7 @@ export type Answer = {
 
 export type Quizz = {
   subject: string
+  instructions: string
   questions: {
     question: string
     image?: string

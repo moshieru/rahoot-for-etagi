@@ -25,9 +25,9 @@ const Manager = () => {
     setQuizzList(quizzList)
   })
 
-  useEvent("manager:gameCreated", ({ gameId, inviteCode }) => {
+  useEvent("manager:gameCreated", ({ gameId, inviteCode, instructions }) => {
     setGameId(gameId)
-    setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode })
+    setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode, instructions })
     router.push(`/game/manager/${gameId}`)
   })
 

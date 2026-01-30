@@ -47,6 +47,14 @@ const ManagerGame = () => {
     },
   )
 
+  useEvent(
+    "manager:gameCreated",
+    ({ gameId, inviteCode, instructions }) => {
+      setGameId(gameId)
+      setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode, instructions })
+    },
+  )
+
   useEvent("game:reset", (message) => {
     router.replace("/manager")
     reset()

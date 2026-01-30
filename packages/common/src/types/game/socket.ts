@@ -52,7 +52,7 @@ export interface ServerToClientEvents {
     currentQuestion: GameUpdateQuestion
   }) => void
   "manager:quizzList": (_quizzList: QuizzWithId[]) => void
-  "manager:gameCreated": (_data: { gameId: string; inviteCode: string }) => void
+  "manager:gameCreated": (_data: { gameId: string; inviteCode: string; instructions?: string }) => void
   "manager:statusUpdate": (_data: {
     status: Status
     data: StatusDataMap[Status]
