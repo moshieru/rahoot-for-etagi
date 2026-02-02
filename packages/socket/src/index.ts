@@ -6,6 +6,7 @@ import Game from "@rahoot/socket/services/game"
 import Registry from "@rahoot/socket/services/registry"
 import { withGame } from "@rahoot/socket/utils/game"
 import { Server as ServerIO } from "socket.io"
+import pool from "@rahoot/socket/db"
 
 const io: Server = new ServerIO({
   cors: {

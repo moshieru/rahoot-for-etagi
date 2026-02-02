@@ -14,6 +14,7 @@ export const config = {
   alias: {
     "@": path.resolve("./src"),
   },
+  external: ['pg']
 }
 
 esbuild.build(config)

@@ -37,37 +37,71 @@ WORKDIR /app/packages/socket
 RUN if [ -f "tsconfig.json" ]; then pnpm build; fi
 
 # ----- RUNNER -----
+# FROM node:22-alpine AS runner
+# WORKDIR /app
+
+# Create a non-root user for better security
+# RUN addgroup --system --gid 1001 nodejs
+# RUN adduser --system --uid 1001 nodejs
+
+
+# # Enable pnpm in the runtime image
+# RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# # Copy only the necessary production dependencies from builder stage
+# COPY --from=deps /app/node_modules ./node_modules
+# COPY --from=deps /app/node_modules/.pnpm ./node_modules/.pnpm
+
+# # Copy the Next.js standalone build
+# COPY --from=builder /app/packages/web/.next/standalone ./
+# COPY --from=builder /app/packages/web/.next/static ./packages/web/.next/static
+# COPY --from=builder /app/packages/web/public ./packages/web/public
+
+# # Copy the socket server build
+# COPY --from=builder /app/packages/socket/dist ./packages/socket/dist
+
+# # Copy the game default config
+# COPY --from=builder /app/config ./config
+
+# # Expose the web and socket ports
+# EXPOSE 3000 3001
+
+# # Environment variables
+# ENV NODE_ENV=production
+# ENV CONFIG_PATH=/app/config
+
+# # Start both services (Next.js web app + Socket server)
+# CMD ["sh", "-c", "echo 'Starting services...' && \
+#      echo 'DATABASE_URL: ' $DATABASE_URL && \
+#      echo 'WEB_ORIGIN: ' $WEB_ORIGIN && \
+#      echo 'SOCKET_PORT: ' $SOCKET_PORT && \
+#      node packages/web/server.js & node packages/socket/dist/index.cjs"]
+
+# ----- RUNNER -----
 FROM node:22-alpine AS runner
 WORKDIR /app
 
-# Create a non-root user for better security
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
-
-
-# Enable pnpm in the runtime image
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy configuration files
-COPY pnpm-workspace.yaml package.json ./
+# Манифесты (важно: include common!)
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/common/package.json ./packages/common/
+COPY packages/socket/package.json ./packages/socket/
+COPY packages/web/package.json ./packages/web/
 
-# Copy the Next.js standalone build
+# Ставим production зависимости в runtime
+RUN pnpm install --prod --frozen-lockfile
+
+# Артефакты сборки из builder
+COPY --from=builder /app/packages/socket/dist ./packages/socket/dist
 COPY --from=builder /app/packages/web/.next/standalone ./
 COPY --from=builder /app/packages/web/.next/static ./packages/web/.next/static
 COPY --from=builder /app/packages/web/public ./packages/web/public
-
-# Copy the socket server build
-COPY --from=builder /app/packages/socket/dist ./packages/socket/dist
-
-# Copy the game default config
 COPY --from=builder /app/config ./config
 
-# Expose the web and socket ports
-EXPOSE 3000 5505
-
-# Environment variables
 ENV NODE_ENV=production
 ENV CONFIG_PATH=/app/config
 
-# Start both services (Next.js web app + Socket server)
+EXPOSE 3000 3001
+
 CMD ["sh", "-c", "node packages/web/server.js & node packages/socket/dist/index.cjs"]

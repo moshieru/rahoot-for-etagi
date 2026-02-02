@@ -494,7 +494,7 @@ class Game {
     this.abortCooldown()
   }
 
-  showLeaderboard() {
+  async showLeaderboard() {
     const isLastRound =
       this.round.currentQuestion + 1 === this.quizz.questions.length
 
@@ -505,6 +505,9 @@ class Game {
         subject: this.quizz.subject,
         top: this.leaderboard.slice(0, 3),
       })
+
+      // Сохраняем результаты игры в базу данных
+      await this.saveGameResults()
 
       return
     }
@@ -519,6 +522,86 @@ class Game {
     })
 
     this.tempOldLeaderboard = null
+  }
+
+  private async saveGameResults() {
+    console.log('=== Начало сохранения результатов игры ===');
+    console.log('DATABASE_URL:', process.env.DATABASE_URL);
+    
+    const { Pool } = require('pg');
+    console.log('Создание пула подключений с URL:', process.env.DATABASE_URL);
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000
+    });
+    
+    let client;
+    try {
+      client = await pool.connect();
+      console.log('Успешное подключение к базе данных');
+      
+      await client.query('BEGIN');
+      console.log('Транзакция начата');
+      
+      // Получаем или создаем запись в quiz
+      console.log('Создание/поиск квиза:', this.quizz.subject);
+      const quizResult = await client.query(
+        `INSERT INTO quiz (name) VALUES ($1) 
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+         RETURNING id`,
+        [this.quizz.subject]
+      );
+      const quizId = quizResult.rows[0].id;
+      console.log('Квиз найден/создан с id:', quizId);
+      
+      // Получаем или создаем запись в quiz_teams
+      console.log('Создание/поиск команды:', this.teamName);
+      const teamResult = await client.query(
+        `INSERT INTO quiz_teams (name) VALUES ($1) 
+         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+         RETURNING id`,
+        [this.teamName]
+      );
+      const teamId = teamResult.rows[0].id;
+      console.log('Команда найдена/создана с id:', teamId);
+      
+      // Сохраняем статистику для каждого игрока
+      console.log(`Начинаем сохранение статистики для ${this.players.length} игроков`);
+      for (const player of this.players) {
+        console.log(`Сохраняем игрока: ${player.username}, очки: ${player.points}`);
+        await client.query(
+          `INSERT INTO quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id) 
+           VALUES ($1, $2, $3, $4, $5)`,
+          [player.username, player.points, new Date(), teamId, quizId]
+        );
+        console.log(`Игрок ${player.username} сохранен успешно`);
+      }
+      
+      await client.query('COMMIT');
+      console.log('=== Результаты игры успешно сохранены в базу данных ===');
+      console.log(`Игра: ${this.gameId}, Квиз: ${this.quizz.subject}, Команда: ${this.teamName}`);
+    } catch (error) {
+      console.error('=== ОШИБКА при сохранении результатов игры ===');
+      console.error('Тип ошибки:', error.name);
+      console.error('Сообщение:', error.message);
+      console.error('Детали:', error);
+      
+      if (client) {
+        try {
+          await client.query('ROLLBACK');
+          console.log('Транзакция отменена (ROLLBACK)');
+        } catch (rollbackError) {
+          console.error('Ошибка при откате транзакции:', rollbackError);
+        }
+      }
+    } finally {
+      if (client) {
+        client.release();
+        console.log('Подключение к базе данных закрыто');
+      }
+    }
   }
 }
 
