@@ -12,4 +12,4 @@ services:
     environment:
       - WEB_ORIGIN=localhost:3000
       - SOCKET_URL=localhost:3001
-      - DATABASE_URL=postgresql://webtutor:eUukMVHNK8@dc0-prod-webtutor-pgsql-01.esoft.local:5432/edu?sslmode=require
+      - DATABASE_URL=postgresql://webtutor:eUukMVHNK8@dc0-prod-webtutor-pgsql-01.esoft.local:5432/edu?sslmode=disable

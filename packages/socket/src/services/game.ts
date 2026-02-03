@@ -548,8 +548,7 @@ class Game {
       // Получаем или создаем запись в quiz
       console.log('Создание/поиск квиза:', this.quizz.subject);
       const quizResult = await client.query(
-        `INSERT INTO quiz (name) VALUES ($1) 
-         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+        `INSERT INTO quizes.quiz (name) VALUES ($1)  
          RETURNING id`,
         [this.quizz.subject]
       );
@@ -559,8 +558,7 @@ class Game {
       // Получаем или создаем запись в quiz_teams
       console.log('Создание/поиск команды:', this.teamName);
       const teamResult = await client.query(
-        `INSERT INTO quiz_teams (name) VALUES ($1) 
-         ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+        `INSERT INTO quizes.quiz_teams (name) VALUES ($1) 
          RETURNING id`,
         [this.teamName]
       );
@@ -572,7 +570,7 @@ class Game {
       for (const player of this.players) {
         console.log(`Сохраняем игрока: ${player.username}, очки: ${player.points}`);
         await client.query(
-          `INSERT INTO quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id) 
+          `INSERT INTO quizes.quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id) 
            VALUES ($1, $2, $3, $4, $5)`,
           [player.username, player.points, new Date(), teamId, quizId]
         );

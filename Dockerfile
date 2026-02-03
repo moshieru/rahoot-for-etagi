@@ -104,4 +104,4 @@ ENV CONFIG_PATH=/app/config
 
 EXPOSE 3000 3001
 
-CMD ["sh", "-c", "node packages/web/server.js & node packages/socket/dist/index.cjs"]
+CMD ["sh", "-c", "node packages/web/server.js & pnpm -C packages/socket start"]
