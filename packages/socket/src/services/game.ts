@@ -38,6 +38,7 @@ class Game {
     currentQuestion: number
     playersAnswers: Answer[]
     startTime: number
+    isBonus: boolean
   }
   cooldown: {
     active: boolean
@@ -70,6 +71,7 @@ class Game {
       playersAnswers: [],
       currentQuestion: 0,
       startTime: 0,
+      isBonus: false
     }
 
     this.cooldown = {
@@ -356,6 +358,7 @@ class Game {
     }
 
     this.round.startTime = Date.now()
+    this.round.isBonus = this.round.currentQuestion < 2 // Первые 2 вопроса - разминочные
 
     this.broadcastStatus(STATUS.SELECT_ANSWER, {
       question: question.question,
@@ -397,12 +400,14 @@ class Game {
           ? playerAnswer.answerId === question.solution
           : false
 
-        const points =
-          playerAnswer && isCorrect ? Math.round(playerAnswer.points) : 0
+        let points = 0
+      if (playerAnswer && isCorrect) {
+        points = this.round.isBonus ? 0 : Math.round(playerAnswer.points)
+      }
 
-        player.points += points
+      player.points += points
 
-        return { ...player, lastCorrect: isCorrect, lastPoints: points }
+      return { ...player, lastCorrect: isCorrect, lastPoints: points }
       })
       .sort((a, b) => b.points - a.points)
     this.players = sortedPlayers
