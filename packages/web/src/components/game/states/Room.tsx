@@ -57,8 +57,8 @@ const Room = ({ data }: Props) => {
         {text}
       </h2>
 
-      <div className="mb-8 text-center">
-        <p className="text-lg text-white">
+      <div className="mb-8 text-center" style={{whiteSpace: 'pre-line'}}>
+        <p className="text-2xl text-white">
           {data.instructions}
         </p>
       </div>
