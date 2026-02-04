@@ -1,12 +1,12 @@
 import { Server } from "@rahoot/common/types/game/socket"
 import { inviteCodeValidator } from "@rahoot/common/validators/auth"
+import pool from "@rahoot/socket/db"
 import env from "@rahoot/socket/env"
 import Config from "@rahoot/socket/services/config"
 import Game from "@rahoot/socket/services/game"
 import Registry from "@rahoot/socket/services/registry"
 import { withGame } from "@rahoot/socket/utils/game"
 import { Server as ServerIO } from "socket.io"
-import pool from "@rahoot/socket/db"
 
 const io: Server = new ServerIO({
   cors: {
@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
       const config = Config.game()
 
       if (password !== config.managerPassword) {
-        socket.emit("manager:errorMessage", "Invalid password")
+        socket.emit("manager:errorMessage", "Неверный пароль")
 
         return
       }
@@ -67,7 +67,7 @@ io.on("connection", (socket) => {
     }
   })
 
-  socket.on("game:create", ({ quizzId, teamName }) => {
+  socket.on("game:create", async ({ quizzId, teamName }) => {
     const quizzList = Config.quizz()
     const quizz = quizzList.find((q) => q.id === quizzId)
 
@@ -77,8 +77,29 @@ io.on("connection", (socket) => {
       return
     }
 
-    const game = new Game(io, socket, quizz, teamName)
-    registry.addGame(game)
+    // Проверяем наличие команды в базе данных
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT id FROM quizes.quiz_teams WHERE LOWER(name) = LOWER($1)',
+        [teamName]
+      );
+      if (result.rows.length > 0) {
+        socket.emit("manager:errorMessage", "Команда с таким названием уже существует. Пожалуйста, выберите другое название");
+
+        return;
+      }
+    } catch (error) {
+      console.error("Ошибка при проверке названия команды:", error);
+      socket.emit("manager:errorMessage", "Ошибка при проверке названия команды");
+      
+      return;
+    } finally {
+      client.release();
+    }
+
+    const game = new Game(io, socket, quizz, teamName);
+    registry.addGame(game);
   })
 
   socket.on("player:join", (inviteCode) => {
