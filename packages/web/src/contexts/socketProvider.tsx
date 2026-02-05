@@ -44,6 +44,14 @@ const getSocketServer = async () => {
 
 const getClientId = (): string => {
   try {
+    const params = new URLSearchParams(window.location.search)
+    const urlId = params.get("userId") ?? params.get("managerId")
+
+    if (urlId) {
+      localStorage.setItem("client_id", urlId)
+      return urlId
+    }
+
     const stored = localStorage.getItem("client_id")
 
     if (stored) {

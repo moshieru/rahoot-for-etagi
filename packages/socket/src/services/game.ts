@@ -563,9 +563,9 @@ class Game {
       // Получаем или создаем запись в quiz_teams
       console.log('Создание/поиск команды:', this.teamName);
       const teamResult = await client.query(
-        `INSERT INTO quizes.quiz_teams (name) VALUES ($1) 
+        `INSERT INTO quizes.quiz_teams (name, managerId) VALUES ($1, $2) 
          RETURNING id`,
-        [this.teamName]
+        [this.teamName, this.manager.clientId]
       );
       const teamId = teamResult.rows[0].id;
       console.log('Команда найдена/создана с id:', teamId);
@@ -575,9 +575,9 @@ class Game {
       for (const player of this.players) {
         console.log(`Сохраняем игрока: ${player.username}, очки: ${player.points}`);
         await client.query(
-          `INSERT INTO quizes.quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id) 
-           VALUES ($1, $2, $3, $4, $5)`,
-          [player.username, player.points, new Date(), teamId, quizId]
+          `INSERT INTO quizes.quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id, userId) 
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [player.username, player.points, new Date(), teamId, quizId, player.clientId]
         );
         console.log(`Игрок ${player.username} сохранен успешно`);
       }
