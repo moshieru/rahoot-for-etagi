@@ -552,15 +552,24 @@ class Game {
       
       // Получаем или создаем запись в quiz
       console.log('Создание/поиск квиза:', this.quizz.subject);
-      const quizResult = await client.query(
-        `INSERT INTO quizes.quiz (name) VALUES ($1)  
-         RETURNING id`,
+      const existingQuiz = await client.query(
+        `SELECT id FROM quizes.quiz WHERE LOWER(name) = LOWER($1) LIMIT 1`,
         [this.quizz.subject]
       );
-      const quizId = quizResult.rows[0].id;
-      console.log('Квиз найден/создан с id:', quizId);
-      
-      // Получаем или создаем запись в quiz_teams
+
+      let quizId: string;
+      if (existingQuiz.rows.length > 0) {
+        quizId = existingQuiz.rows[0].id;
+        console.log('Квиз найден с id:', quizId);
+      } else {
+        const quizResult = await client.query(
+          `INSERT INTO quizes.quiz (name) VALUES ($1)  
+           RETURNING id`,
+          [this.quizz.subject]
+        );
+        quizId = quizResult.rows[0].id;
+        console.log('Квиз создан с id:', quizId);
+      }// Получаем или создаем запись в quiz_teams
       console.log('Создание/поиск команды:', this.teamName);
       const teamResult = await client.query(
         `INSERT INTO quizes.quiz_teams (name, managerId) VALUES ($1, $2) 
@@ -609,3 +618,4 @@ class Game {
 }
 
 export default Game
+
