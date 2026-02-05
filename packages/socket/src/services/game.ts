@@ -570,14 +570,26 @@ class Game {
       const teamId = teamResult.rows[0].id;
       console.log('Команда найдена/создана с id:', teamId);
       
+      // Импортируем userId и managerId из общего контекста
+      const { userId: globalUserId, managerId: globalManagerId } = await import('@rahoot/web/utils/userContext');
+      
+      // Сохраняем managerId в quiz_teams, если он существует
+      if (globalManagerId) {
+        await client.query(
+          `UPDATE quizes.quiz_teams SET managerId = $1 WHERE id = $2`,
+          [globalManagerId, teamId]
+        );
+        console.log('managerId сохранён в quiz_teams:', globalManagerId);
+      }
+      
       // Сохраняем статистику для каждого игрока
       console.log(`Начинаем сохранение статистики для ${this.players.length} игроков`);
       for (const player of this.players) {
         console.log(`Сохраняем игрока: ${player.username}, очки: ${player.points}`);
         await client.query(
-          `INSERT INTO quizes.quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id) 
-           VALUES ($1, $2, $3, $4, $5)`,
-          [player.username, player.points, new Date(), teamId, quizId]
+          `INSERT INTO quizes.quiz_statistics (fio, score, game_date, quiz_teams_id, quiz_id, userId) 
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [player.username, player.points, new Date(), teamId, quizId, globalUserId || null]
         );
         console.log(`Игрок ${player.username} сохранен успешно`);
       }
