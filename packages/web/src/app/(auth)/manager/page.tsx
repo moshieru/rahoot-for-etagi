@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { QuizzWithId } from "@rahoot/common/types/game"
 import { STATUS } from "@rahoot/common/types/game/status"
@@ -8,17 +8,20 @@ import TeamNameForm from "@rahoot/web/components/game/create/TeamNameForm"
 import { useEvent, useSocket } from "@rahoot/web/contexts/socketProvider"
 import { useManagerStore } from "@rahoot/web/stores/manager"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const Manager = () => {
   const { setGameId, setStatus } = useManagerStore()
   const router = useRouter()
-  const { socket } = useSocket()
+  const { socket, isConnected } = useSocket()
 
   const [isAuth, setIsAuth] = useState(false)
   const [quizzList, setQuizzList] = useState<QuizzWithId[]>([])
   const [selectedQuizz, setSelectedQuizz] = useState<string | null>(null)
   const [showTeamForm, setShowTeamForm] = useState(false)
+  const [authRequested, setAuthRequested] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [blockedMessage, setBlockedMessage] = useState<string | null>(null)
 
   useEvent("manager:quizzList", (quizzList) => {
     setIsAuth(true)
@@ -27,9 +30,25 @@ const Manager = () => {
 
   useEvent("manager:gameCreated", ({ gameId, inviteCode, instructions }) => {
     setGameId(gameId)
-    setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode, instructions })
+    setStatus(STATUS.SHOW_ROOM, { text: "РћР¶РёРґР°РЅРёРµ РёРіСЂРѕРєРѕРІ", inviteCode, instructions })
     router.push(`/game/manager/${gameId}`)
   })
+
+  useEvent("auth:allowed", () => {
+    setAuthChecked(true)
+  })
+
+  useEvent("auth:blocked", ({ message }) => {
+    setBlockedMessage(message)
+    setAuthChecked(true)
+  })
+
+  useEffect(() => {
+    if (isConnected && socket && !authRequested) {
+      socket.emit("auth:check", { role: "manager" })
+      setAuthRequested(true)
+    }
+  }, [authRequested, isConnected, socket])
 
   const handleAuth = (password: string) => {
     socket?.emit("manager:auth", password)
@@ -47,6 +66,22 @@ const Manager = () => {
         teamName
       })
     }
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="text-center text-2xl font-bold text-white drop-shadow-lg">
+        Проверка доступа...
+      </div>
+    )
+  }
+
+  if (blockedMessage) {
+    return (
+      <div className="text-center text-2xl font-bold text-white drop-shadow-lg">
+        {blockedMessage}
+      </div>
+    )
   }
 
   if (!isAuth) {

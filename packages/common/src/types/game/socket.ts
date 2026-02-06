@@ -61,6 +61,10 @@ export interface ServerToClientEvents {
   "manager:removePlayer": (_playerId: string) => void
   "manager:errorMessage": (_message: string) => void
   "manager:playerKicked": (_playerId: string) => void
+
+  // Auth events
+  "auth:allowed": () => void
+  "auth:blocked": (_data: { message: string }) => void
 }
 
 export interface ClientToServerEvents {
@@ -85,6 +89,9 @@ export interface ClientToServerEvents {
   "player:selectedAnswer": (
     _message: MessageWithoutStatus<{ answerKey: number }>
   ) => void
+
+  // Auth
+  "auth:check": (_message: { role: "player" | "manager" }) => void
 
   // Common
   disconnect: () => void

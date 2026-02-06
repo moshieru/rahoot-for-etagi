@@ -26,6 +26,50 @@ io.on("connection", (socket) => {
     `A user connected: socketId: ${socket.id}, clientId: ${socket.handshake.auth.clientId}`
   )
 
+  socket.on("auth:check", async ({ role }) => {
+    const clientId = socket.handshake.auth.clientId
+
+    if (!clientId) {
+      socket.emit("auth:blocked", {
+        message: "Упс! Кажется, вы уже играли",
+      })
+      return
+    }
+
+    try {
+      if (role === "player") {
+        const result = await pool.query(
+          "SELECT 1 FROM quizes.quiz_statistics WHERE userId = $1 LIMIT 1",
+          [clientId]
+        )
+        if (result.rows.length > 0) {
+          socket.emit("auth:blocked", {
+            message: "Упс! Кажется, вы уже играли",
+          })
+          return
+        }
+      } else {
+        const result = await pool.query(
+          "SELECT 1 FROM quizes.quiz_teams WHERE managerId = $1 LIMIT 1",
+          [clientId]
+        )
+        if (result.rows.length > 0) {
+          socket.emit("auth:blocked", {
+            message: "Упс! Кажется, вы уже играли",
+          })
+          return
+        }
+      }
+
+      socket.emit("auth:allowed")
+    } catch (error) {
+      console.error("Auth check failed:", error)
+      socket.emit("auth:blocked", {
+        message: "Не удалось проверить доступ. Попробуйте позже.",
+      })
+    }
+  })
+
   socket.on("player:reconnect", ({ gameId }) => {
     const game = registry.getPlayerGame(gameId, socket.handshake.auth.clientId)
 
