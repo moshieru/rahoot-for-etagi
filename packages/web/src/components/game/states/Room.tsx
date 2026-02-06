@@ -47,8 +47,13 @@ const Room = ({ data }: Props) => {
 
   return (
     <section className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-2">
-      <div className="mb-10 rotate-3 rounded-md bg-white px-6 py-4 text-6xl font-extrabold">
-        {inviteCode}
+      <div className="mb-10 flex flex-col items-center gap-2">
+        <div className="text-2xl font-bold text-white drop-shadow-lg">
+          Код комнаты:
+        </div>
+        <div className="rotate-3 rounded-md bg-white px-6 py-4 text-6xl font-extrabold">
+          {inviteCode}
+        </div>
       </div>
 
 
