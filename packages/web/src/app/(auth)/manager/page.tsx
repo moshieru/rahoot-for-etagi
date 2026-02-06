@@ -2,7 +2,6 @@
 
 import { QuizzWithId } from "@rahoot/common/types/game"
 import { STATUS } from "@rahoot/common/types/game/status"
-import ManagerPassword from "@rahoot/web/components/game/create/ManagerPassword"
 import SelectQuizz from "@rahoot/web/components/game/create/SelectQuizz"
 import TeamNameForm from "@rahoot/web/components/game/create/TeamNameForm"
 import { useEvent, useSocket } from "@rahoot/web/contexts/socketProvider"
@@ -22,6 +21,7 @@ const Manager = () => {
   const [authRequested, setAuthRequested] = useState(false)
   const [authChecked, setAuthChecked] = useState(false)
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null)
+  const [quizzRequested, setQuizzRequested] = useState(false)
 
   useEvent("manager:quizzList", (quizzList) => {
     setIsAuth(true)
@@ -30,7 +30,7 @@ const Manager = () => {
 
   useEvent("manager:gameCreated", ({ gameId, inviteCode, instructions }) => {
     setGameId(gameId)
-    setStatus(STATUS.SHOW_ROOM, { text: "РћР¶РёРґР°РЅРёРµ РёРіСЂРѕРєРѕРІ", inviteCode, instructions })
+    setStatus(STATUS.SHOW_ROOM, { text: "Ожидание игроков", inviteCode, instructions })
     router.push(`/game/manager/${gameId}`)
   })
 
@@ -50,9 +50,12 @@ const Manager = () => {
     }
   }, [authRequested, isConnected, socket])
 
-  const handleAuth = (password: string) => {
-    socket?.emit("manager:auth", password)
-  }
+  useEffect(() => {
+    if (authChecked && !blockedMessage && socket && !quizzRequested) {
+      socket.emit("manager:auth", "")
+      setQuizzRequested(true)
+    }
+  }, [authChecked, blockedMessage, quizzRequested, socket])
 
   const handleSelectQuizz = (quizzId: string) => {
     setSelectedQuizz(quizzId)
@@ -85,7 +88,11 @@ const Manager = () => {
   }
 
   if (!isAuth) {
-    return <ManagerPassword onSubmit={handleAuth} />
+    return (
+      <div className="text-center text-2xl font-bold text-white drop-shadow-lg">
+        Загрузка квизов...
+      </div>
+    )
   }
 
   if (showTeamForm) {

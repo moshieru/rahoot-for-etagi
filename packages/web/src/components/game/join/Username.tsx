@@ -42,7 +42,7 @@ const Username = () => {
       <Input
         onChange={(e) => setUsername(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ваше ФИО"
+        placeholder="Введите ник"
       />
       <Button onClick={handleLogin}>Принять</Button>
     </Form>

@@ -129,7 +129,7 @@ class Game {
     )
 
     if (isAlreadyConnected) {
-      socket.emit("game:errorMessage", "Player already connected")
+      socket.emit("game:errorMessage", "Игрок уже подключен")
 
       return
     }
@@ -166,7 +166,7 @@ class Game {
     this.io.in(playerId).socketsLeave(this.gameId)
     this.io
       .to(player.id)
-      .emit("game:reset", "You have been kicked by the manager")
+      .emit("game:reset", "Вы были кикнуты менеджером")
     this.io.to(this.manager.id).emit("manager:playerKicked", player.id)
     this.io.to(this.gameId).emit("game:totalPlayers", this.players.length)
   }
@@ -184,7 +184,7 @@ class Game {
 
   private reconnectManager(socket: Socket) {
     if (this.manager.connected) {
-      socket.emit("game:reset", "Manager already connected")
+      socket.emit("game:reset", "Менеджер уже подключен")
 
       return
     }
@@ -210,7 +210,7 @@ class Game {
     socket.emit("game:totalPlayers", this.players.length)
 
     registry.reactivateGame(this.gameId)
-    console.log(`Manager reconnected to game ${this.inviteCode}`)
+    console.log(`Менеджер переподключился к игре ${this.inviteCode}`)
   }
 
   private reconnectPlayer(socket: Socket) {
@@ -222,7 +222,7 @@ class Game {
     }
 
     if (player.connected) {
-      socket.emit("game:reset", "Player already connected")
+      socket.emit("game:reset", "Игрок уже подключен")
 
       return
     }
@@ -258,7 +258,7 @@ class Game {
     })
     socket.emit("game:totalPlayers", this.players.length)
     console.log(
-      `Player ${player.username} reconnected to game ${this.inviteCode}`
+      `Игрок ${player.username} переподключился к игре ${this.inviteCode}`
     )
   }
 

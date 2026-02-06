@@ -1,4 +1,4 @@
-import { Server } from "@rahoot/common/types/game/socket"
+﻿import { Server } from "@rahoot/common/types/game/socket"
 import { inviteCodeValidator } from "@rahoot/common/validators/auth"
 import pool from "@rahoot/socket/db"
 import env from "@rahoot/socket/env"
@@ -79,7 +79,7 @@ io.on("connection", (socket) => {
       return
     }
 
-    socket.emit("game:reset", "Game not found")
+    socket.emit("game:reset", "Игра не найдена")
   })
 
   socket.on("manager:reconnect", ({ gameId }) => {
@@ -94,16 +94,8 @@ io.on("connection", (socket) => {
     socket.emit("game:reset", "Game expired")
   })
 
-  socket.on("manager:auth", (password) => {
+  socket.on("manager:auth", () => {
     try {
-      const config = Config.game()
-
-      if (password !== config.managerPassword) {
-        socket.emit("manager:errorMessage", "Неверный пароль")
-
-        return
-      }
-
       socket.emit("manager:quizzList", Config.quizz())
     } catch (error) {
       console.error("Failed to read game config:", error)
@@ -116,7 +108,7 @@ io.on("connection", (socket) => {
     const quizz = quizzList.find((q) => q.id === quizzId)
 
     if (!quizz) {
-      socket.emit("game:errorMessage", "Quizz not found")
+      socket.emit("game:errorMessage", "Квиз не найден")
 
       return
     }
